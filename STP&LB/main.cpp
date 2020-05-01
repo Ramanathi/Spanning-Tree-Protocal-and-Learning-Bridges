@@ -178,6 +178,18 @@ int main() {
 		}
 		pro_traces[GLOBAL_TIME] = new_tr;
 		if(all_set) {
+			if(flag == 1) {
+				cout<<"r referes to recieved and s referes to send \n";
+				for(auto it = pro_traces.begin(); it != pro_traces.end(); it++) {
+					int time = it->first;
+					vector<trace> v = it->second;
+					for(int i=0; i < v.size() ; i++) {
+						cout<<"at time "<<time<<" ";
+						trace t = v[i];
+						cout<<"at bridge "<<t.occurs_at<<" through port "<<t.port<<" '"<<t.status<<"' message(B"<<t.msg.assumed_root<<", "<<t.msg.distance<<", B"<<t.msg.sender<<") \n";
+					}
+				}
+			}
 			break;
 		} 
 		
