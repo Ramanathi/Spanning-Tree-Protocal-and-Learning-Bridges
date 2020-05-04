@@ -1,81 +1,4 @@
-#include <bits/stdc++.h> 
-using namespace std; 
-
-struct lan
-{
-	int bridge_count;
-	char id;
-	vector<int> lan_connect;
-	vector<int> hosts;
-
-	lan() {
-
-	}
-
-	lan(int bridge_count, char id, vector<int> &lan_connect) {
-		this->bridge_count = bridge_count;
-		this->id = id;
-		this->lan_connect = lan_connect;
-	}
-};
-
-struct bridge
-{
-	int lan_count;
-	int id;
-	vector<char> bridge_connect;
-	map<int, char> table;
-	map<char, char> port_type;
-
-	bridge() {
-
-	}
-
-	bridge(int lan_count,int id, vector<char> &bridge_connect) {
-		this->lan_count = lan_count;
-		this->id = id;
-		this->bridge_connect = bridge_connect;
-	}
-
-};
-
-struct message
-{
-	int sender;
-	int assumed_root;
-	int distance;
-
-	message() {
-
-	}
-
-	message(int assumed_root, int distance, int sender) {
-		this->assumed_root = assumed_root;
-		this->distance = distance;
-		this->sender = sender;
-	}
-};
-
-
-struct trace
-{
-	char status;
-	int occurs_at;
-	char port;
-	message msg;
-
-	trace() {
-
-	}
-
-	trace(char status, int occurs_at, char port, message msg) {
-		this->status = status;
-		this->occurs_at = occurs_at;
-		this->port = port;
-		this->msg = msg;
-	}
-};
-
+#include "utils.h"
 
 int main() {
 	int flag;
@@ -129,6 +52,8 @@ int main() {
 	map<int, vector<trace> > pro_traces;
 	vector<trace> tr;
 
+	// Initial configuration messages from each bridge
+
 	for(int i=1;i<=bridge_count; i++) {
 		assumed_roots[i] = i;
 		dist_from_root[i] = 0;
@@ -139,6 +64,8 @@ int main() {
 		}
 	}
 	pro_traces[GLOBAL_TIME] = tr;
+
+	// Implementing STP
 
 	while(true) {
 		auto it = pro_traces.end(); it--;
@@ -195,6 +122,7 @@ int main() {
 		
 	}
 
+	// Finding a root port for each bridge
 
 	for(int i=1;i<=bridge_count; i++) {
 		bridge b = BRIDGES[i];
@@ -222,6 +150,8 @@ int main() {
 		b.port_type[port] = 'R';
 		BRIDGES[i] = b;
 	}
+
+	// finding a designated bridge for each lan (or) assiging a designated port on that bridge for that lan
 
 	for(auto it = LANS.begin(); it != LANS.end() ; it++) {
 		lan local = it->second;
@@ -276,6 +206,8 @@ int main() {
 		BRIDGES[i] = b;
 	}
 
+	// Taking the data of hosts on each lan
+
 	map<int, char> host_lan;
 
 	for(auto it= LANS.begin();it != LANS.end(); it++) {
@@ -300,6 +232,9 @@ int main() {
 		} while (ss);  
 		LANS[l] = local;
 	}
+
+	// Taking the hosts pair which is in communication
+
 	int transmits; cin>>transmits; getline(cin, str);
 	while(transmits > 0) {
 		string str;
@@ -342,7 +277,7 @@ int main() {
 					forward[sender] = from_lan;
 					b.table = forward;
 					BRIDGES[to_bridges[i].second] = b;
-					if(it == forward.end()) {
+					if(it == forward.end()) {                      // if the reciever host is NOT in forwarding table
 						for(int j = 0; j < b.lan_count ; j++) {
 							lan local = LANS[b.bridge_connect[j]];
 							if(local.id != from_lan) {
@@ -353,7 +288,7 @@ int main() {
 								}
 							}
 						}
-					} else {
+					} else {                                   // if the reciever host is in forwarding table
 						for(int j = 0; j < b.lan_count ; j++) {
 							lan local = LANS[b.bridge_connect[j]];
 							if(local.id == it->second && local.id != from_lan) {
